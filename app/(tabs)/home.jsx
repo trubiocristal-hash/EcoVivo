@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,8 +10,9 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/context/AuthContext';
-import { todayStats, weeklyData, categoryBreakdown } from '@/mock_data/stats';
+import { getTodayStats, weeklyData, categoryBreakdown } from '@/mock_data/stats';
 import BarChart from '@/components/BarChart';
 import StatCard from '@/components/StatCard';
 import {
@@ -27,8 +29,23 @@ const STATUS_H = Platform.OS === 'ios' ? 50 : (StatusBar.currentHeight || 24);
 
 export default function HomeScreen() {
   const { user } = useAuth();
-  const router = useRouter();
-  const progressPct = Math.round((todayStats.kilosCollected / todayStats.goal) * 100);
+  const router   = useRouter();
+
+  // ── Estado local reactivo — se actualiza cada vez que la tab gana foco ──
+  const [stats, setStats] = useState(() => getTodayStats());
+
+  useFocusEffect(
+    useCallback(() => {
+      // Vuelve a pedir el snapshot actual de la store en memoria
+      setStats(getTodayStats());
+    }, [])
+  );
+
+  // Derivado: se recalcula cada render, reacciona al estado `stats`
+  const progressPct = Math.min(
+    100,
+    Math.round((stats.kilosCollected / stats.goal) * 100)
+  );
 
   return (
     <View style={styles.root}>
@@ -53,15 +70,16 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+        {/* ── Hero card ──────────────────────────────────────────────────── */}
         <View style={styles.heroCard}>
           <View style={styles.heroCardTop}>
             <View>
               <Text style={styles.heroLabel}>Kilos recolectados hoy</Text>
               <View style={styles.heroValueRow}>
-                <Text style={styles.heroValue}>{todayStats.kilosCollected}</Text>
+                <Text style={styles.heroValue}>{stats.kilosCollected}</Text>
                 <Text style={styles.heroUnit}>kg</Text>
               </View>
-              <Text style={styles.heroGoal}>Meta: {todayStats.goal} kg</Text>
+              <Text style={styles.heroGoal}>Meta: {stats.goal} kg</Text>
             </View>
             <View style={styles.donut}>
               <View style={[styles.donutRing, { borderColor: '#A5D6A7' }]}>
@@ -74,14 +92,15 @@ export default function HomeScreen() {
             <View style={[styles.progressBar, { width: `${progressPct}%` }]} />
           </View>
           <Text style={styles.progressCaption}>
-            {todayStats.goal - todayStats.kilosCollected} kg restantes para la meta diaria
+            {Math.max(0, stats.goal - stats.kilosCollected).toFixed(1)} kg restantes para la meta diaria
           </Text>
         </View>
 
+        {/* ── Stat cards ─────────────────────────────────────────────────── */}
         <View style={styles.statsGrid}>
           <StatCard
             label="Tasa de desvío"
-            value={todayStats.diversionRate}
+            value={stats.diversionRate}
             unit="%"
             icon={TrendingUp}
             color="#43A047"
@@ -89,7 +108,7 @@ export default function HomeScreen() {
           />
           <StatCard
             label="CO₂ ahorrado"
-            value={todayStats.co2Saved}
+            value={stats.co2Saved}
             unit="kg"
             icon={Leaf}
             color="#00ACC1"
@@ -100,7 +119,7 @@ export default function HomeScreen() {
         <View style={styles.statsGrid}>
           <StatCard
             label="Recolecciones"
-            value={todayStats.collectionsCount}
+            value={stats.collectionsCount}
             unit="hoy"
             icon={Recycle}
             color="#FB8C00"
@@ -108,7 +127,7 @@ export default function HomeScreen() {
           />
           <StatCard
             label="Voluntarios activos"
-            value={todayStats.volunteersActive}
+            value={stats.volunteersActive}
             unit="now"
             icon={Users}
             color="#1E88E5"
@@ -116,6 +135,7 @@ export default function HomeScreen() {
           />
         </View>
 
+        {/* ── Gráfica semanal (datos estáticos — no mutan en Fase 2) ─────── */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recolección semanal</Text>
@@ -126,6 +146,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {/* ── Composición de residuos ────────────────────────────────────── */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Composición de residuos</Text>
@@ -174,43 +195,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 24,
   },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
+  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   greeting: { color: '#A5D6A7', fontSize: 14 },
   name: { color: '#fff', fontSize: 22, fontWeight: '800', marginTop: 2 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   bellBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 40, height: 40, borderRadius: 20,
     backgroundColor: 'rgba(255,255,255,0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'center', justifyContent: 'center',
   },
   badge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#FF5252',
-    borderWidth: 1.5,
-    borderColor: '#1B5E20',
+    position: 'absolute', top: 8, right: 8,
+    width: 8, height: 8, borderRadius: 4,
+    backgroundColor: '#FF5252', borderWidth: 1.5, borderColor: '#1B5E20',
   },
   avatar: { width: 40, height: 40, borderRadius: 20, borderWidth: 2, borderColor: '#4CAF50' },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 8 },
   location: { color: '#A5D6A7', fontSize: 12 },
   scroll: { padding: 16, gap: 16 },
-  heroCard: {
-    backgroundColor: '#1B5E20',
-    borderRadius: 20,
-    padding: 20,
-    marginTop: -8,
-  },
+  heroCard: { backgroundColor: '#1B5E20', borderRadius: 20, padding: 20, marginTop: -8 },
   heroCardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   heroLabel: { color: '#A5D6A7', fontSize: 13, marginBottom: 4 },
   heroValueRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 4 },
@@ -219,85 +222,47 @@ const styles = StyleSheet.create({
   heroGoal: { color: '#81C784', fontSize: 12, marginTop: 4 },
   donut: { alignItems: 'center', justifyContent: 'center' },
   donutRing: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 80, height: 80, borderRadius: 40, borderWidth: 6,
+    alignItems: 'center', justifyContent: 'center',
   },
   donutPct: { color: '#fff', fontSize: 18, fontWeight: '800' },
   donutLbl: { color: '#A5D6A7', fontSize: 10 },
   progressTrack: {
-    height: 6,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 3,
-    marginTop: 16,
-    overflow: 'hidden',
+    height: 6, backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 3, marginTop: 16, overflow: 'hidden',
   },
-  progressBar: {
-    height: '100%',
-    backgroundColor: '#69F0AE',
-    borderRadius: 3,
-  },
+  progressBar: { height: '100%', backgroundColor: '#69F0AE', borderRadius: 3 },
   progressCaption: { color: '#A5D6A7', fontSize: 11, marginTop: 6 },
   statsGrid: { flexDirection: 'row', gap: 12 },
   section: {},
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-    marginBottom: 10,
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'baseline', marginBottom: 10,
   },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: '#1B2E1D' },
   sectionSub: { fontSize: 12, color: '#9E9E9E' },
   chartCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    backgroundColor: '#fff', borderRadius: 16, padding: 16,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
   },
   compCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    gap: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    backgroundColor: '#fff', borderRadius: 16, padding: 16, gap: 12,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
   },
   compRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   compDot: { width: 8, height: 8, borderRadius: 4 },
   compName: { fontSize: 13, color: '#424242', width: 90 },
-  compTrack: {
-    flex: 1,
-    height: 6,
-    backgroundColor: '#F5F5F5',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
+  compTrack: { flex: 1, height: 6, backgroundColor: '#F5F5F5', borderRadius: 3, overflow: 'hidden' },
   compFill: { height: '100%', borderRadius: 3 },
   compPct: { fontSize: 12, fontWeight: '700', width: 36, textAlign: 'right' },
   ctaBtn: {
-    backgroundColor: '#2E7D32',
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    shadowColor: '#2E7D32',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 6,
+    backgroundColor: '#2E7D32', borderRadius: 16,
+    paddingVertical: 16, paddingHorizontal: 20,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+    shadowColor: '#2E7D32', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 10, elevation: 6,
   },
   ctaBtnText: { color: '#fff', fontSize: 15, fontWeight: '700', flex: 1, textAlign: 'center' },
 });

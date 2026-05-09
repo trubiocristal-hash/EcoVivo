@@ -1,4 +1,11 @@
-export const collectionHistory = [
+// mock_data/history.js
+// En lugar de exportar arreglos desnudos, exponemos una "mini-store" mutable
+// con getters y una función de escritura. Esto permite que WasteService.js
+// agregue registros en tiempo de ejecución sin romper ningún consumer existente.
+
+// ─── Datos iniciales (semilla) ────────────────────────────────────────────────
+
+let _collectionHistory = [
   {
     id: '1',
     date: '2026-05-09',
@@ -73,7 +80,7 @@ export const collectionHistory = [
   },
 ];
 
-export const volunteerProfile = {
+export let volunteerProfile = {
   name: 'María González',
   role: 'Voluntaria Verificada',
   avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
@@ -91,3 +98,31 @@ export const volunteerProfile = {
   stadium: 'Estadio Akron',
   joinDate: 'Enero 2026',
 };
+
+// ─── API de la store ──────────────────────────────────────────────────────────
+
+/** Devuelve una copia del historial (más reciente primero). */
+export const getCollectionHistory = () => [..._collectionHistory];
+
+/**
+ * Inserta un nuevo registro al inicio del historial y actualiza el perfil.
+ * Solo WasteService debe llamar esta función.
+ *
+ * @param {Object} record  - Registro ya enriquecido y validado por el servicio.
+ */
+export const appendCollectionRecord = (record) => {
+  _collectionHistory = [record, ..._collectionHistory];
+
+  // Actualizar acumulados del perfil en memoria
+  volunteerProfile = {
+    ...volunteerProfile,
+    totalKilos: parseFloat((volunteerProfile.totalKilos + record.kilos).toFixed(1)),
+    totalPoints: volunteerProfile.totalPoints + record.points,
+    totalCollections: volunteerProfile.totalCollections + 1,
+  };
+};
+
+// Compatibilidad retroactiva: cualquier módulo que haga
+// `import { collectionHistory } from '@/mock_data/history'`
+// recibirá la semilla inicial. Para datos reactivos usa getCollectionHistory().
+export const collectionHistory = _collectionHistory;

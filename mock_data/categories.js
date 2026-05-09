@@ -1,3 +1,7 @@
+// mock_data/categories.js
+// Exportamos los datos como una constante inmutable (no cambia en runtime).
+// El servicio los consume directamente; no necesita mutarlos.
+
 export const wasteCategories = [
   {
     id: 'plastic',
@@ -60,3 +64,10 @@ export const wasteCategories = [
     examples: ['Baterías', 'Medicamentos', 'Electrónicos', 'Pilas'],
   },
 ];
+
+/**
+ * Helper: devuelve un objeto de categoría por su `id`.
+ * Usado por el servicio para enriquecer el registro guardado.
+ */
+export const getCategoryById = (id) =>
+  wasteCategories.find((c) => c.id === id) ?? null;
