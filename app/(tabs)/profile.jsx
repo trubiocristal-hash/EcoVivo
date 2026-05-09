@@ -47,30 +47,30 @@ export default function ProfileScreen() {
     }, [])
   );
 
-  // ── Puente de exportación de datos ───────────────────────────────────────
+  // ── Puente de exportación CSV — insumo para sistema externo en C ─────────
   const handleExportData = () => {
     const records = getCollectionHistory();
-    const payload = {
-      exportedAt:       new Date().toISOString(),
-      totalRecords:     records.length,
-      volunteer: {
-        name:              profile.name,
-        totalKilos:        profile.totalKilos,
-        totalPoints:       profile.totalPoints,
-        totalCollections:  profile.totalCollections,
-      },
-      collections: records,
-    };
 
-    const jsonString = JSON.stringify(payload, null, 2);
+    // Encabezado fijo de columnas
+    const CSV_HEADER = 'id,date,category,kilos,location';
 
-    // console.log disponible para herramientas externas o depuración
-    console.log('[EcoVivo Export]', jsonString);
+    // Una línea por registro.
+    // Regla crítica: las comas internas de `location` se reemplazan por
+    // " -" para no romper la estructura de columnas al parsear en C con strtok().
+    const csvRows = records.map((r) => {
+      const safeLocation = r.location.replace(/,/g, ' -');
+      return `${r.id},${r.date},${r.category},${r.kilos},${safeLocation}`;
+    });
 
-    // Alert muestra el JSON crudo — insumo listo para ser parseado en C
+    const csvString = [CSV_HEADER, ...csvRows].join('\n');
+
+    // Etiqueta clara para captura desde herramientas externas o Metro
+    console.log('[EcoVivo_CSV_Export]\n' + csvString);
+
+    // Alert con el CSV crudo — legible línea por línea desde C con fgets()
     Alert.alert(
       'Exportar Datos de Memoria',
-      jsonString,
+      csvString,
       [{ text: 'Cerrar', style: 'cancel' }],
       { cancelable: true }
     );
@@ -202,7 +202,7 @@ export default function ProfileScreen() {
             <View style={styles.exportTextWrap}>
               <Text style={styles.exportLabel}>Exportar Datos de Memoria</Text>
               <Text style={styles.exportSub}>
-                Genera JSON completo del historial en memoria
+                Genera CSV completo del historial en memoria
               </Text>
             </View>
             <ChevronRight color="#1E88E5" size={16} />
