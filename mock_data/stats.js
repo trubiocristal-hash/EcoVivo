@@ -5,38 +5,38 @@
 // ─── Datos iniciales ──────────────────────────────────────────────────────────
 
 let _todayStats = {
-  kilosCollected: 142.5,
-  diversionRate: 87,
-  collectionsCount: 23,
-  co2Saved: 38.4,       // 0.27 kg CO₂ por kg de residuo desviado (promedio)
-  volunteersActive: 12,
-  goal: 200,
+  kilosCollected: 28.4,
+  diversionRate: 92,
+  collectionsCount: 8,
+  co2Saved: 7.05,       // 0.27 kg CO₂ por kg de residuo desviado (promedio)
+  volunteersActive: 1,
+  goal: 40,
 };
 
 export const weeklyData = [
-  { day: 'Lun', kilos: 98 },
-  { day: 'Mar', kilos: 134 },
-  { day: 'Mié', kilos: 112 },
-  { day: 'Jue', kilos: 165 },
-  { day: 'Vie', kilos: 142 },
-  { day: 'Sáb', kilos: 188 },
-  { day: 'Dom', kilos: 76 },
+  { day: 'Lun', kilos: 18 },
+  { day: 'Mar', kilos: 22 },
+  { day: 'Mié', kilos: 31 },
+  { day: 'Jue', kilos: 16 },
+  { day: 'Vie', kilos: 12 },
+  { day: 'Sáb', kilos: 25 },
+  { day: 'Dom', kilos: 28 },
 ];
 
 export const monthlyDiversionData = [
-  { label: 'Ene', value: 72 },
-  { label: 'Feb', value: 78 },
-  { label: 'Mar', value: 81 },
-  { label: 'Abr', value: 85 },
-  { label: 'May', value: 87 },
+  { label: 'Ene', value: 65 },
+  { label: 'Feb', value: 72 },
+  { label: 'Mar', value: 80 },
+  { label: 'Abr', value: 88 },
+  { label: 'May', value: 92 },
 ];
 
 export const categoryBreakdown = [
-  { name: 'Plástico',  percentage: 34, color: '#2196F3' },
-  { name: 'Orgánico',  percentage: 28, color: '#4CAF50' },
-  { name: 'Papel',     percentage: 19, color: '#FF9800' },
-  { name: 'Vidrio',    percentage: 12, color: '#00BCD4' },
-  { name: 'Metal',     percentage:  7, color: '#9E9E9E' },
+  { name: 'Plástico',  percentage: 45, color: '#2196F3' },
+  { name: 'Orgánico',  percentage: 30, color: '#4CAF50' },
+  { name: 'Papel',     percentage: 15, color: '#FF9800' },
+  { name: 'Vidrio',    percentage: 5, color: '#00BCD4' },
+  { name: 'Metal',     percentage:  5, color: '#9E9E9E' },
 ];
 
 // ─── API de la store ──────────────────────────────────────────────────────────

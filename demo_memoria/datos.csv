@@ -1,9 +1,12 @@
 id,date,category,kilos,location
-1778352355726-85c67,2026-05-09,Vidrio,25,Estadio Akron - Sector Norte
-1778352334571-4a88i,2026-05-09,Plástico,20,Estadio Akron - Sector Norte
-1,2026-05-09,Plástico,4.2,Estadio Akron - Sector Norte
-2,2026-05-09,Orgánico,6.8,Estadio Akron - Sector Sur
-3,2026-05-08,Papel y Cartón,3.1,Estadio Jalisco - Entrada Principal
-4,2026-05-08,Metal,2.5,Estadio Akron - Zona Comercial
-5,2026-05-07,Vidrio,8.3,Estadio Jalisco - Sector Oriente
-6,2026-05-07,Plástico,5.7,Estadio Akron - Sector Sur
+1778384081960-d4xbo,2026-05-10,Papel y Cartón,2,Estadio Akron - Sector Norte
+1778384053387-fximu,2026-05-10,Plástico,5,Estadio Akron - Sector Norte
+1,2026-05-09,Plástico,5.2,Estadio Akron - Graderías Oriente
+2,2026-05-09,Orgánico,7.5,Estadio Akron - Zona Gastronómica
+3,2026-05-09,Plástico,4.1,Estadio Akron - Acceso 3
+4,2026-05-09,Papel,2.8,Estadio Akron - Palcos
+5,2026-05-09,Orgánico,3.2,Estadio Akron - Zona de Snacks
+6,2026-05-09,Metal,1.5,Estadio Akron - Estacionamiento
+7,2026-05-09,Plástico,2.6,Estadio Akron - Sector Norte
+8,2026-05-09,Vidrio,1.5,Estadio Akron - Bar VIP
+9,2026-05-08,Papel,3.1,Estadio Jalisco - Entrada Principal
